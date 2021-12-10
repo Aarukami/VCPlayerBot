@@ -1,4 +1,17 @@
+#!/usr/bin/env python3
+# Copyright (C) @subinps
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from utils import (
     play, 
     start_stream,
@@ -19,6 +32,9 @@ if Config.DATABASE_URI:
 
 
 async def main():
+    await bot.start()
+    Config.BOT_USERNAME = (await bot.get_me()).username
+    LOGGER.info(f"{Config.BOT_USERNAME} Started.")
     if Config.DATABASE_URI:
         try:
             if await db.is_saved("RESTART"):
@@ -50,6 +66,19 @@ async def main():
         await idle()
         return
 
+    try:
+        await group_call.start()
+        Config.USER_ID = (await USER.get_me()).id
+        k=await startup_check()
+        if k == False:
+            LOGGER.error("Startup checks not passed , bot is quiting")
+            await bot.stop()
+            LOGGER.info("Activating debug mode, you can reconfigure your bot with /env command.")
+            from utils import debug
+            await debug.start()
+            await idle()
+            return
+
         if Config.IS_LOOP:
             if Config.playlist:
                 await play()
@@ -72,6 +101,5 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.get_event_loop().run_until_complete(main())
-
 
 
