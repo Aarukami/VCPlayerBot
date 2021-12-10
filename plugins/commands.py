@@ -1,17 +1,4 @@
-#!/usr/bin/env python3
-# Copyright (C) @subinps
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from utils import LOGGER
 from contextlib import suppress
 from config import Config
@@ -56,77 +43,7 @@ if Config.DATABASE_URI:
 HOME_TEXT = "<b>Hey  [{}](tg://user?id={}) 🙋‍♂️\n\nIam A Bot Built To Play or Stream Videos In Telegram VoiceChats.\nI Can Stream Any YouTube Video Or A Telegram File Or Even A YouTube Live.</b>"
 admin_filter=filters.create(is_admin) 
 
-@Client.on_message(filters.command(['start', f"start@{Config.BOT_USERNAME}"]))
-async def start(client, message):
-    if len(message.command) > 1:
-        if message.command[1] == 'help':
-            reply_markup=InlineKeyboardMarkup(
-                [
-                    [
-                        InlineKeyboardButton(f"Play", callback_data='help_play'),
-                        InlineKeyboardButton(f"Settings", callback_data=f"help_settings"),
-                        InlineKeyboardButton(f"Recording", callback_data='help_record'),
-                    ],
-                    [
-                        InlineKeyboardButton("Scheduling", callback_data="help_schedule"),
-                        InlineKeyboardButton("Controling", callback_data='help_control'),
-                        InlineKeyboardButton("Admins", callback_data="help_admin"),
-                    ],
-                    [
-                        InlineKeyboardButton(f"Misc", callback_data='help_misc'),
-                        InlineKeyboardButton("Close", callback_data="close"),
-                    ],
-                ]
-                )
-            await message.reply("Learn to use the VCPlayer, Showing help menu, Choose from the below options.",
-                reply_markup=reply_markup,
-                disable_web_page_preview=True
-                )
-        elif 'sch' in message.command[1]:
-            msg=await message.reply("Checking schedules..")
-            you, me = message.command[1].split("_", 1)
-            who=Config.SCHEDULED_STREAM.get(me)
-            if not who:
-                return await msg.edit("Something gone somewhere.")
-            del Config.SCHEDULED_STREAM[me]
-            whom=f"{message.chat.id}_{msg.message_id}"
-            Config.SCHEDULED_STREAM[whom] = who
-            await sync_to_db()
-            if message.from_user.id not in Config.ADMINS:
-                return await msg.edit("OK da")
-            today = datetime.now(IST)
-            smonth=today.strftime("%B")
-            obj = calendar.Calendar()
-            thisday = today.day
-            year = today.year
-            month = today.month
-            m=obj.monthdayscalendar(year, month)
-            button=[]
-            button.append([InlineKeyboardButton(text=f"{str(smonth)}  {str(year)}",callback_data=f"sch_month_choose_none_none")])
-            days=["Mon", "Tues", "Wed", "Thu", "Fri", "Sat", "Sun"]
-            f=[]
-            for day in days:
-                f.append(InlineKeyboardButton(text=f"{day}",callback_data=f"day_info_none"))
-            button.append(f)
-            for one in m:
-                f=[]
-                for d in one:
-                    year_=year
-                    if d < int(today.day):
-                        year_ += 1
-                    if d == 0:
-                        k="\u2063"   
-                        d="none"   
-                    else:
-                        k=d    
-                    f.append(InlineKeyboardButton(text=f"{k}",callback_data=f"sch_month_{year_}_{month}_{d}"))
-                button.append(f)
-            button.append([InlineKeyboardButton("Close", callback_data="schclose")])
-            await msg.edit(f"Choose the day of the month you want to schedule the voicechat.\nToday is {thisday} {smonth} {year}. Chooosing a date preceeding today will be considered as next year {year+1}", reply_markup=InlineKeyboardMarkup(button))
 
-
-
-        return
 
 
 
