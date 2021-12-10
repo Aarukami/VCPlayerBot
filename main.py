@@ -32,9 +32,6 @@ if Config.DATABASE_URI:
 
 
 async def main():
-    await bot.start()
-    Config.BOT_USERNAME = (await bot.get_me()).username
-    LOGGER.info(f"{Config.BOT_USERNAME} Started.")
     if Config.DATABASE_URI:
         try:
             if await db.is_saved("RESTART"):
