@@ -66,19 +66,6 @@ async def main():
         await idle()
         return
 
-    try:
-        await group_call.start()
-        Config.USER_ID = (await USER.get_me()).id
-        k=await startup_check()
-        if k == False:
-            LOGGER.error("Startup checks not passed , bot is quiting")
-            await bot.stop()
-            LOGGER.info("Activating debug mode, you can reconfigure your bot with /env command.")
-            from utils import debug
-            await debug.start()
-            await idle()
-            return
-
         if Config.IS_LOOP:
             if Config.playlist:
                 await play()
